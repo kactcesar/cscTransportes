@@ -10,30 +10,41 @@ from django.views.decorators.http import require_GET
 
 def viagens_index(request):
     return render(request, 'viagens/charts.html')
-# View que retorna o resultado da consulta SQL em JSON
 
 
+dadosTabela = {}
 
-def dados_viagem_lista(request):
-    dados = consulta()
+def querry_tabela_lista(request):  
+    start_date_tab = request.GET.get('start_date_tab')
+    end_date_tab = request.GET.get('end_date_tab')
+    
+    dados = consulta(start_date_tab, end_date_tab)
+    print(dados)
+    
+    global dadosTabela
+    dadosTabela = dados
+    
     if 'error' in dados:
         return JsonResponse({
             'error': dados['error'],
             'aviso': 'Problema ao consultar os dados'
         }, status=500)
-    # Envolva os dados retornados dentro da chave 'data'
+        
     return JsonResponse({'dados': dados})
+
+
+def dados_tabela_lista(request):
+    global dadosTabela
+
+    return JsonResponse({'dados': dadosTabela})
 
 
 dadosGrafico = {}
 
-def grafico_viagem_lista(request):  
+def querry_lista(request):  
     start_date = request.GET.get('start_date')
     end_date = request.GET.get('end_date')
-    
-    dados = consulta_grafico(start_date, end_date)
-    print(dados)
-    
+    dados = consulta_grafico(start_date, end_date)  
     global dadosGrafico
     dadosGrafico = dados
     
@@ -46,8 +57,7 @@ def grafico_viagem_lista(request):
     return JsonResponse({'dados': dados})
 
 @require_GET
-def obter_dados_grafico(request):
-    # Retornar os dados armazenados na variável global
+def dados_grafico(request):
     global dadosGrafico
 
     if not dadosGrafico:

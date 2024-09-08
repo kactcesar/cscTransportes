@@ -31,31 +31,28 @@
 <div class="card card-custom gutter-b bg-white mt-10">
     <div class="card-body">
         <div class="accordion accordion-light accordion-toggle-arrow" id="accordionExample2">
-            <div class="form-group row">
-                <div class="col-md-6">
-                    <label for="start_date">Data de Início:</label>
-                    <input type="date" id="start_date" name="start_date" class="form-control" required>
-                </div>
-                <div class="col-md-6">
-                    <label for="end_date">Data de Fim:</label>
-                    <input type="date" id="end_date" name="end_date" class="form-control" required>
-                </div>
-            </div>
-
-            <!-- Botão com ícone -->
-            <div class="text-right">
-                <button type="submit" class="btn btn-primary">
-                    <i class="fa fa-filter"></i> Filtrar
-                </button>
-            </div>
-
+            <!-- Gráfico vai ser renderizado aqui -->
             <div class="card mt-5">
                 <div class="card-header" id="headingOne2">
-                    <div class="card-title" data-toggle="collapse" data-target="#collapseOne2">
-                        Gráficos
+                    <div class="d-flex align-items-center">
+                        <!-- Formulário dentro do cabeçalho -->
+                        <div class="form-group mb-0 mr-2">
+                            <label for="start_date" class="sr-only">Data de Início:</label>
+                            <input type="date" id="start_date" name="start_date" class="form-control" required>
+                        </div>
+                        <div class="form-group mb-0 mr-2">
+                            <label for="end_date" class="sr-only">Data de Fim:</label>
+                            <input type="date" id="end_date" name="end_date" class="form-control" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fa fa-filter"></i> Filtrar
+                        </button>
                     </div>
-                </div>         <!-- Gráfico vai ser renderizado aqui -->
-                <div id="chart_2" class="d-flex justify-content-center"></div> 
+                    <div class="card-title mt-2" data-toggle="collapse" data-target="#collapseOne2">
+                        Gráfico
+                    </div>
+                </div>
+                <div id="chart_2" class="d-flex justify-content-center"></div>
             </div>
         </div>
     </div>
@@ -64,18 +61,31 @@
 
 <div class="card card-custom gutter-b bg-white mt-10">
     <div class="card-body">
-        <button onclick="abrir_modal_csc_trans()" class="btn btn-light-primary btn-icon btn-circle">
-            <i class="flaticon2-add-1"></i>
-        </button>
+        <div class="form-group row justify-content-end align-items-center mb-4">
+            <div class="col-md-2">
+                <label for="start_date_tab">Data de Início:</label>
+                <input type="date" id="start_date_tab" name="start_date_tab" class="form-control" required>
+            </div>
+            <div class="col-md-2">
+                <label for="end_date_tab">Data de Fim:</label>
+                <input type="date" id="end_date_tab" name="end_date_tab" class="form-control" required>
+            </div>
+            <div class="col-md-2 text-right">
+                <!-- Botão com ícone -->
+                <button id="filtrar_periodo" class="btn btn-primary mt-4">
+                    <i class="fa fa-filter"></i> Filtrar
+                </button>
+            </div>
+        </div>
         
         <table class="table table-head-custom" id="kt_csc_trans">
             <thead>
                 <tr>
-                    <th class="datatable-row datatable-row-even">ID Motorista</th>
-                    <th class="datatable-row datatable-row-even">Total de Viagens </th>
-                    <th class="datatable-row datatable-row-even">Tempo total de viagens </th>
-                    <th class="datatable-row datatable-row-even">Combustivel utilizado</th>
-                    <th class="datatable-row datatable-row-even"> Total de Excesso de Velocidade</th>
+                    <th>ID Motorista</th>
+                    <th>Total de Viagens</th>
+                    <th>Tempo total de viagens</th>
+                    <th>Combustível utilizado</th>
+                    <th>Total de Excesso de Velocidade</th>
                 </tr>
             </thead>
             <tbody>
@@ -83,5 +93,8 @@
         </table> 
     </div>
 </div>
+
+
+
 
 {% endblock %} 

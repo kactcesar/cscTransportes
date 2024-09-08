@@ -21,6 +21,10 @@ const Toast = Swal.mixin({
 var tab_csc_trans = function() {
     var kt_csc_trans = function() {
         
+        if ($.fn.DataTable.isDataTable('#kt_csc_trans')) {
+            table.DataTable().destroy();
+        }
+
         var table = $('#kt_csc_trans');
         // begin first table
         table.on('processing.dt', function (e, settings, processing) {
@@ -60,7 +64,7 @@ var tab_csc_trans = function() {
                 }
             },
             ajax: {
-                url: '/viagens/dados_viagem_lista/',
+                url: '/viagens/dados_tabela_lista/',
                 type: 'POST',
                 dataSrc: 'dados',
                 data: function(d) {
@@ -72,16 +76,14 @@ var tab_csc_trans = function() {
                 {data: 'id_motorista'},               
                 {data: 'total_viagens'},    
                 {data: 'tempo_total_viagem'},         
-                {data: 'combustível_usado'},  
+                {data: 'combustivel_usado_litros'},  
                 {data: 'total_excessos_velocidade'},  
             ],            
             columnDefs: [               
             ],
         });  
     };
-
     return {
-        //main function to initiate the module
         init: function() {
             kt_csc_trans();
         },
@@ -92,30 +94,27 @@ var tab_csc_trans = function() {
 
 jQuery(document).ready(function() {
     tab_csc_trans.init()
-
+    
     $('button[type="submit"]').on('click', function(event) {
         event.preventDefault();  // Prevenir o comportamento padrão do botão de submit
-
         // Pegar os valores das datas
         let startDate = $('#start_date').val();
         let endDate = $('#end_date').val();
-
         // Validar se as datas foram preenchidas
         if (!startDate || !endDate) {
             alert("Por favor, preencha as duas datas.");
             return;
         }
-
         $.ajax({
-            url: '/viagens/grafico_viagem_lista/',  // URL para o seu backend
+            url: '/viagens/querry_lista/',
             method: 'GET',
             data: {
                 start_date: startDate,
                 end_date: endDate
             },
             success: function(response) {
-                // Apenas logar a resposta por enquanto
-                KTApexChartsDemo.init();
+            //inicializa o grafico quando clicar no botão de filtrar
+                KTApexChartsCSC.init();
                 console.log(response);
             },
             error: function(error) {
@@ -124,17 +123,41 @@ jQuery(document).ready(function() {
         });
     });
 
-    
+    $('#filtrar_periodo').click(function(e) {
+        e.preventDefault(); // Evita o comportamento padrão do botão
+        // Pegar os valores das datas
+        let startDateTab = $('#start_date_tab').val();
+        let endDateTab = $('#end_date_tab').val();
+        // Validar se as datas foram preenchidas
+        if (!startDateTab || !endDateTab) {
+            alert("Por favor, preencha as duas datas.");
+            return;
+        }
+        $.ajax({
+            url: '/viagens/querry_tabela_lista/',
+            method: 'GET',
+            data: {
+                start_date_tab: startDateTab,
+                end_date_tab: endDateTab
+            },
+            success: function(response) {
+                $('#kt_csc_trans').DataTable().ajax.reload();
+                console.log(response);
+            },
+            error: function(error) {
+                console.error('Erro:', error);
+            }
+        });
+    });
 });
 
-var KTApexChartsDemo = function () {
-    var chart; // Armazenará a instância do gráfico
 
+var KTApexChartsCSC = function () {
+    var chart; // Armazenará a instância do gráfico
     var grafico = function () {
         const apexChart = "#chart_2";
-
-        // Realizar a requisição AJAX para obter os dados da URL
-        fetch('/viagens/obter_dados_grafico/')
+        // Realizar a requisição AJAX para obter os dados da Função "dados_grafico em viwer"
+        fetch('/viagens/dados_grafico/')
             .then(response => response.json())
             .then(data => {
                 // Verificar se há erro nos dados
@@ -142,7 +165,6 @@ var KTApexChartsDemo = function () {
                     console.error(data.error);
                     return;
                 }
-
                 // Verificar se não há dados
                 if (!data.dados || data.dados.length === 0) {
                     Swal.fire({
@@ -151,28 +173,20 @@ var KTApexChartsDemo = function () {
                         text: 'Não há dados disponíveis para exibir no gráfico.',
                         confirmButtonText: 'OK'
                     });
-                    // Opcional: limpar o gráfico se necessário
-                    document.querySelector(apexChart).innerHTML = ''; 
-                    return;
                 }
-
-                console.log('Dados recebidos:', data);
-                // Preparar os dados do gráfico
                 var seriesData = [];
                 var labelsData = [];
-
-                // Preencher as séries e labels com base nos dados retornados
+                
                 data.dados.forEach(item => {
                     labelsData.push(item.categoria); // A categoria do motorista
                     seriesData.push(item.quantidade_motoristas); // A quantidade de motoristas por categoria
                 });
-
                 // Configurar as opções do gráfico com os dados retornados
                 var options = {
-                    series: seriesData,  // Dados recebidos
+                    series: seriesData,  
                     chart: {
                         width: 580,
-                        type: 'pie',  // Tipo de gráfico, modifique conforme necessário
+                        type: 'pie',  
                     },
                     labels: labelsData,  
                     responsive: [{
@@ -188,7 +202,6 @@ var KTApexChartsDemo = function () {
                     }],
                     colors: ['#008FFB', '#00E396', '#FEB019', '#FF4560', '#775DD0']
                 };
-
                 // Renderizar o gráfico
                 if (chart) {
                     chart.updateOptions(options);
@@ -201,14 +214,12 @@ var KTApexChartsDemo = function () {
                 console.error('Erro ao carregar dados:', error);
             });
     }
-
     // Função para atualizar a série de dados do gráfico
     var updateSeries = function(newData) {
         if (chart) {
-            // Atualizar a série do gráfico com novos dados
             chart.updateSeries([{
                 data: newData.seriesData
-            }], false); // O segundo parâmetro `false` evita a animação
+            }], false);
             chart.updateOptions({
                 labels: newData.labelsData
             });
@@ -216,12 +227,11 @@ var KTApexChartsDemo = function () {
             console.error('O gráfico ainda não foi inicializado.');
         }
     }
-
     return {
-        // Funções públicas
+    
         init: function () {
             grafico();
         },
-        updateSeries: updateSeries // Exportar a função para atualização
+        updateSeries: updateSeries 
     };
 }();

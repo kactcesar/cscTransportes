@@ -2,28 +2,29 @@ from django.db import connection, DatabaseError
 from django.http import JsonResponse
 
 # Função que executa a query SQL personalizada
-def consulta():
+def consulta(start_date_tab, end_date_tab):
     with connection.cursor() as cursor:
         try:
             query = """
                     SELECT
-                    driver_id AS id_motorista,
-                    COUNT(id) AS total_viagens,
-                    SUM(total_time) AS tempo_total_viagem,
-                    SUM(fuel_used) AS combustível_usado,
-                    SUM(count_over_speed) AS total_excessos_velocidade
-                FROM
-                    dadosviagem  
-                WHERE
-                    start_time >= '2024-01-01' AND start_time < '2024-03-01'
-                GROUP BY
-                    driver_id
-                ORDER BY
-                    total_viagens DESC;
+                driver_id AS id_motorista,
+                COUNT(id) AS total_viagens,
+                TO_CHAR(TO_TIMESTAMP(SUM(total_time)), 'HH24:MI:SS') AS tempo_total_viagem,
+                ROUND(SUM(fuel_used) / 1000, 2) AS combustivel_usado_litros,
+                SUM(count_over_speed) AS total_excessos_velocidade
+            FROM
+                dadosviagem  
+            WHERE
+                start_time >= %s AND start_time < %s
+            GROUP BY
+                driver_id
+            ORDER BY
+                total_viagens DESC;
+
 
             """
             # Executar a consulta
-            cursor.execute(query)
+            cursor.execute(query, [start_date_tab, end_date_tab])
             rows = cursor.fetchall()
 
             # Pegar os nomes das colunas para criar o dicionário
